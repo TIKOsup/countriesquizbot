@@ -9,6 +9,7 @@
   "author": "Temirlan Kystaubayev",
   "license": "ISC",
   "dependencies": {
+    "axios": "^1.6.5",
     "grammy": "^1.20.3"
   }
 }
