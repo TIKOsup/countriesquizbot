@@ -29,6 +29,23 @@ bot.callbackQuery("options", async (ctx) => {
     })
 });
 
+bot.callbackQuery("true", async (ctx) => {
+    ctx.reply("Correct 👍");
+    await quiz.createQuestion(ctx);
+});
+
+bot.callbackQuery("false", async (ctx) => {
+    ctx.reply("Incorrect 👎");
+    await quiz.createQuestion(ctx);
+});
+
+bot.callbackQuery("stop", async (ctx) => {
+    ctx.reply("Quiz stopped.")
+    await ctx.answerCallbackQuery({
+        text: "You pressed 'Stop' button."
+    })
+})
+
 
 
 bot.start();

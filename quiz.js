@@ -2,18 +2,21 @@ const { InlineKeyboard, InputMediaBuilder, InputFile } = require("grammy");
 // const RestCountriesApi = require("./rest-countries-api.js");
 const axios = require("axios");
 
+let countriesData;
+
 /* Main logic of the quiz.
    Starts after pressing the "Start the Quiz" inline btn */
 async function quizStart(ctx) {
-    let countriesData;
-
     await axios.get("https://restcountries.com/v3.1/all").then((res) => {
         countriesData = res.data;
+        createQuestion(ctx);
     });
+}
 
+async function createQuestion(ctx) {
     let pickedCountry = countriesData[getRandomNum(countriesData.length)];
     let options = getQuestionOptions(countriesData, pickedCountry.name.common, 4)
-    sendQuestion(ctx, pickedCountry.flags.png, options);
+    await sendQuestion(ctx, pickedCountry.flags.png, options);
 }
 
 /* Sends flag image and a question with options */
@@ -23,7 +26,7 @@ async function sendQuestion(ctx, flag, options) {
 
     const question = InputMediaBuilder.photo(flag);
     await ctx.replyWithMediaGroup([question]);
-    ctx.reply("Which country's flag is shown above?", { reply_markup: optionsKeyboard });
+    await ctx.reply("Which country's flag is shown above?", { reply_markup: optionsKeyboard });
 }
 
 /* Creates an array of options */
@@ -48,7 +51,7 @@ function getQuestionOptions(countriesData, rightCountryName, optionsNum) {
     }
 
     options = shuffle(options);
-    console.log(options);
+    options.push(["Stop", "stop"]);
 
     return options;
 }
@@ -59,4 +62,4 @@ function getRandomNum(max) {
 }
 
 
-module.exports = { quizStart };
+module.exports = { quizStart, createQuestion };
