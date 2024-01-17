@@ -5,8 +5,7 @@ const axios = require("axios");
 let countriesData;
 let currentCountry;
 
-/* Main logic of the quiz.
-   Starts after pressing the "Start the Quiz" inline btn */
+/* Main logic of the quiz */
 async function quizStart(ctx) {
     await axios.get("https://restcountries.com/v3.1/all").then((res) => {
         countriesData = res.data;
@@ -15,15 +14,14 @@ async function quizStart(ctx) {
 }
 
 /* Checks the entered text with the answer */
-function checkAnswer(answer) {
-    return currentCountry === answer;
+function getAnswer() {
+    return currentCountry;
 }
 
 /* Takes a random country, creates an array of options */
 async function createQuestion(ctx) {
     let pickedCountry = countriesData[getRandomNum(countriesData.length)];
     currentCountry = pickedCountry.name.common;
-    console.log(currentCountry);
     let options = getQuestionOptions(countriesData, pickedCountry.name.common, 4)
     await sendQuestion(ctx, pickedCountry.flags.png, options);
 }
@@ -71,4 +69,4 @@ function getRandomNum(max) {
 }
 
 
-module.exports = { quizStart, createQuestion, checkAnswer };
+module.exports = { quizStart, createQuestion, getAnswer };
