@@ -18,16 +18,20 @@ bot.command("start", (ctx) => {
 });
 
 bot.command("quiz", (ctx) => {
-    quizStatus = !quizStatus;
-    quiz.quizStart(ctx);
+    if (!quizStatus) {
+        quizStatus = !quizStatus;
+        quiz.quizStart(ctx);
+    }
 });
 
 bot.callbackQuery("start", async (ctx) => {
-    quizStatus = !quizStatus;
-    quiz.quizStart(ctx);
-    await ctx.answerCallbackQuery({
-        text: "You pressed 'Start' button."
-    });
+    if (!quizStatus) {
+        quizStatus = !quizStatus;
+        quiz.quizStart(ctx);
+        await ctx.answerCallbackQuery({
+            text: "You pressed 'Start' button."
+        });
+    }
 });
 
 bot.callbackQuery("options", async (ctx) => {
