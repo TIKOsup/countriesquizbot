@@ -1,8 +1,9 @@
-const { InlineKeyboard, InputMediaBuilder, InputFile } = require("grammy");
+const { Keyboard, InputMediaBuilder } = require("grammy");
 // const RestCountriesApi = require("./rest-countries-api.js");
 const axios = require("axios");
 
 let countriesData;
+let currentCountry;
 
 /* Main logic of the quiz.
    Starts after pressing the "Start the Quiz" inline btn */
@@ -13,16 +14,24 @@ async function quizStart(ctx) {
     });
 }
 
+/* Checks the entered text with the answer */
+function checkAnswer(answer) {
+    return currentCountry === answer;
+}
+
+/* Takes a random country, creates an array of options */
 async function createQuestion(ctx) {
     let pickedCountry = countriesData[getRandomNum(countriesData.length)];
+    currentCountry = pickedCountry.name.common;
+    console.log(currentCountry);
     let options = getQuestionOptions(countriesData, pickedCountry.name.common, 4)
     await sendQuestion(ctx, pickedCountry.flags.png, options);
 }
 
 /* Sends flag image and a question with options */
 async function sendQuestion(ctx, flag, options) {
-    const optionsRow = options.map(([label, data]) => InlineKeyboard.text(label, data));
-    const optionsKeyboard = InlineKeyboard.from([optionsRow]);
+    const optionsRows = options.map((label) => [Keyboard.text(label)]);
+    const optionsKeyboard = Keyboard.from(optionsRows).resized().oneTime();
 
     const question = InputMediaBuilder.photo(flag);
     await ctx.replyWithMediaGroup([question]);
@@ -41,17 +50,17 @@ function getQuestionOptions(countriesData, rightCountryName, optionsNum) {
         return array;
     }
 
-    let options = [[rightCountryName, "true"]];
+    let options = [rightCountryName];
 
     // Fills an array with incorrect options
     for (let i = 0; options.length < optionsNum; i++) {
         let falseOption = countriesData[getRandomNum(countriesData.length)].name.common;
         // Adds only unique countries as options
-        if (!options.includes(falseOption)) options.push([falseOption, "false"]);
+        if (!options.includes(falseOption)) options.push(falseOption);
     }
 
     options = shuffle(options);
-    options.push(["Stop", "stop"]);
+    options.push("Stop Quiz");
 
     return options;
 }
@@ -62,4 +71,4 @@ function getRandomNum(max) {
 }
 
 
-module.exports = { quizStart, createQuestion };
+module.exports = { quizStart, createQuestion, checkAnswer };

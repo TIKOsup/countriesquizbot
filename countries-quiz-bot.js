@@ -1,4 +1,4 @@
-const { Bot, InlineKeyboard } = require("grammy");
+const { Bot, InlineKeyboard, Keyboard } = require("grammy");
 const config = require("./config.json");
 const quiz = require("./quiz.js");
 
@@ -24,28 +24,18 @@ bot.callbackQuery("start", async (ctx) => {
 });
 
 bot.callbackQuery("options", async (ctx) => {
+    const keyboard = new Keyboard()
+        .text("Send location");
+    ctx.reply("Keyboard", { reply_markup: keyboard });
     await ctx.answerCallbackQuery({
-        text: "You pressed 'Options' button."
+        text: "You pressed 'Options' button.",
     })
 });
 
-bot.callbackQuery("true", async (ctx) => {
-    ctx.reply("Correct 👍");
+bot.on("message:text", async (ctx) => {
+    quiz.checkAnswer(ctx.msg.text) ? ctx.reply("Correct 👍") : ctx.reply("Incorrect 👎");
     await quiz.createQuestion(ctx);
 });
-
-bot.callbackQuery("false", async (ctx) => {
-    ctx.reply("Incorrect 👎");
-    await quiz.createQuestion(ctx);
-});
-
-bot.callbackQuery("stop", async (ctx) => {
-    ctx.reply("Quiz stopped.")
-    await ctx.answerCallbackQuery({
-        text: "You pressed 'Stop' button."
-    })
-})
-
 
 
 bot.start();
