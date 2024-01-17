@@ -4,6 +4,8 @@ const quiz = require("./quiz.js");
 
 const bot = new Bot(config.token);
 
+let quizStatus = false;
+console.log(quizStatus);
 
 bot.command("start", (ctx) => {
     const inlineKeyboard = new InlineKeyboard()
@@ -17,6 +19,8 @@ bot.command("start", (ctx) => {
 });
 
 bot.callbackQuery("start", async (ctx) => {
+    quizStatus = !quizStatus;
+    console.log(quizStatus);
     quiz.quizStart(ctx);
     await ctx.answerCallbackQuery({
         text: "You pressed 'Start' button."
@@ -32,9 +36,21 @@ bot.callbackQuery("options", async (ctx) => {
     })
 });
 
+bot.hears(/stop quiz/i, async (ctx) => {
+    if (quizStatus) {
+        quizStatus = !quizStatus;
+        console.log(quizStatus);
+        await ctx.reply("Quiz Stopped.", {
+            reply_markup: { remove_keyboard: true }
+        });
+    }
+});
+
 bot.on("message:text", async (ctx) => {
-    quiz.checkAnswer(ctx.msg.text) ? ctx.reply("Correct 👍") : ctx.reply("Incorrect 👎");
-    await quiz.createQuestion(ctx);
+    if (quizStatus) {
+        quiz.checkAnswer(ctx.msg.text) ? ctx.reply("Correct 👍") : ctx.reply("Incorrect 👎");
+        await quiz.createQuestion(ctx);
+    }
 });
 
 

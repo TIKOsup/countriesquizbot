@@ -31,7 +31,7 @@ async function createQuestion(ctx) {
 /* Sends flag image and a question with options */
 async function sendQuestion(ctx, flag, options) {
     const optionsRows = options.map((label) => [Keyboard.text(label)]);
-    const optionsKeyboard = Keyboard.from(optionsRows).resized().oneTime();
+    const optionsKeyboard = Keyboard.from(optionsRows).resized().oneTime().toFlowed(2);
 
     const question = InputMediaBuilder.photo(flag);
     await ctx.replyWithMediaGroup([question]);
@@ -60,7 +60,7 @@ function getQuestionOptions(countriesData, rightCountryName, optionsNum) {
     }
 
     options = shuffle(options);
-    options.push("Stop Quiz");
+    options.push("Stop Quiz 🫡");
 
     return options;
 }
