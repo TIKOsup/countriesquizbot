@@ -10,7 +10,9 @@ function createInitialSessionData() {
         countriesOrder: [],
         orderNum: 0,
         currentCountryName: "",
-        questionNum: 0
+        questionNum: 0,
+        rightAnswers: 0,
+        wrongAnswers: 0
     };
 }
 bot.use(session({ initial: createInitialSessionData }));
@@ -59,8 +61,17 @@ bot.hears(/stop quiz/i, async (ctx) => {
 bot.on("message:text", async (ctx) => {
     if (ctx.session.quizStatus) {
         let answer = ctx.session.currentCountryName;
-        await answer === ctx.msg.text ? ctx.reply("Correct 👍") : ctx.reply(`Incorrect 👎. Right answer is <b>${answer}</b>`, { parse_mode: "HTML" });
-        setTimeout(() => { quiz.createQuestion(ctx, ctx.session.countriesOrder[ctx.session.orderNum]); }, 2000);
+        if (answer === ctx.msg.text) {
+            ctx.session.rightAnswers += 1;
+            ctx.reply("Correct 👍");
+        } else {
+            ctx.session.wrongAnswers += 1;
+            ctx.reply(`Incorrect 👎. Right answer is <b>${answer}</b>`, 
+                { parse_mode: "HTML" });
+        }
+        setTimeout(() => {
+            quiz.createQuestion(ctx, ctx.session.countriesOrder[ctx.session.orderNum]);
+        }, 2000);
     }
 });
 

@@ -65,9 +65,15 @@ function stopQuiz(ctx) {
     if (ctx.session.quizStatus) {
         ctx.session.quizStatus = !ctx.session.quizStatus;
         ctx.session.orderNum = 0;
-        ctx.reply("Quiz Stopped.", {
-            reply_markup: { remove_keyboard: true }
-        });
+        ctx.session.questionNum = 0;
+
+        let rightAnswers = ctx.session.rightAnswers;
+        let wrongAnswers = ctx.session.wrongAnswers;
+        ctx.session.rightAnswers = 0;
+        ctx.session.wrongAnswers = 0;
+
+        ctx.reply(`Quiz Stopped. Right answers: ${rightAnswers}. Wrong answers: ${wrongAnswers}`, 
+            { reply_markup: { remove_keyboard: true } });
     }
 }
 
