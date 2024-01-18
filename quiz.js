@@ -17,15 +17,21 @@ async function quizStart(ctx) {
     });
 }
 
-/* Takes a random country, creates an array of options */
+/* Takes a country, creates an array of options */
 async function createQuestion(ctx, questionNum) {
-    let pickedCountry = countriesData[ctx.session.countriesOrder[questionNum]];
+    if (ctx.session.questionNum >= ctx.session.countriesOrder.length) {
+        stopQuiz(ctx);
+    }
+    else {
+        let pickedCountry = countriesData[questionNum];
 
-    ctx.session.orderNum = ctx.session.orderNum + 1;
-    ctx.session.currentCountryName = pickedCountry.name.common;
-
-    let options = getQuestionOptions(countriesData, pickedCountry.name.common, 4)
-    await sendQuestion(ctx, pickedCountry.flags.png, options);
+        ctx.session.orderNum = ctx.session.orderNum + 1;
+        ctx.session.questionNum = ctx.session.questionNum + 1;
+        ctx.session.currentCountryName = pickedCountry.name.common;
+    
+        let options = getQuestionOptions(countriesData, pickedCountry.name.common, 4)
+        await sendQuestion(ctx, pickedCountry.flags.png, options);
+    }
 }
 
 /* Sends flag image and a question with options */
@@ -35,7 +41,7 @@ async function sendQuestion(ctx, flag, options) {
 
     const question = InputMediaBuilder.photo(flag);
     await ctx.replyWithMediaGroup([question]);
-    await ctx.reply("Which country's flag is shown above?", { reply_markup: optionsKeyboard });
+    await ctx.reply(`Flag #${ctx.session.questionNum}. Which country's flag is shown above?`, { reply_markup: optionsKeyboard });
 }
 
 /* Creates an array of options */
@@ -55,6 +61,16 @@ function getQuestionOptions(countriesData, rightCountryName, optionsNum) {
     return options;
 }
 
+function stopQuiz(ctx) {
+    if (ctx.session.quizStatus) {
+        ctx.session.quizStatus = !ctx.session.quizStatus;
+        ctx.session.orderNum = 0;
+        ctx.reply("Quiz Stopped.", {
+            reply_markup: { remove_keyboard: true }
+        });
+    }
+}
+
 /* Randomly shuffles an array element's order */
 function shuffle (array) {
     for (let i = array.length - 1; i > 0; i--) {
@@ -70,4 +86,4 @@ function getRandomNum(max) {
 }
 
 
-module.exports = { quizStart, createQuestion };
+module.exports = { quizStart, createQuestion, stopQuiz };

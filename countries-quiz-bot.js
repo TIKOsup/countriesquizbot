@@ -9,7 +9,8 @@ function createInitialSessionData() {
         quizStatus: false,
         countriesOrder: [],
         orderNum: 0,
-        currentCountryName: ""
+        currentCountryName: "",
+        questionNum: 0
     };
 }
 bot.use(session({ initial: createInitialSessionData }));
@@ -52,13 +53,7 @@ bot.callbackQuery("options", async (ctx) => {
 });
 
 bot.hears(/stop quiz/i, async (ctx) => {
-    if (ctx.session.quizStatus) {
-        ctx.session.quizStatus = !ctx.session.quizStatus;
-        ctx.session.orderNum = 0;
-        await ctx.reply("Quiz Stopped.", {
-            reply_markup: { remove_keyboard: true }
-        });
-    }
+    quiz.stopQuiz(ctx);
 });
 
 bot.on("message:text", async (ctx) => {
