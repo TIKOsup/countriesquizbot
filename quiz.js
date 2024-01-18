@@ -3,7 +3,6 @@ const { Keyboard, InputMediaBuilder } = require("grammy");
 const axios = require("axios");
 
 let countriesData;
-let currentCountry;
 
 /* Main logic of the quiz */
 async function quizStart(ctx) {
@@ -13,15 +12,10 @@ async function quizStart(ctx) {
     });
 }
 
-/* Checks the entered text with the answer */
-function getAnswer() {
-    return currentCountry;
-}
-
 /* Takes a random country, creates an array of options */
 async function createQuestion(ctx) {
     let pickedCountry = countriesData[getRandomNum(countriesData.length)];
-    currentCountry = pickedCountry.name.common;
+    ctx.session.currentCountry = pickedCountry.name.common;
     let options = getQuestionOptions(countriesData, pickedCountry.name.common, 4)
     await sendQuestion(ctx, pickedCountry.flags.png, options);
 }
@@ -69,4 +63,4 @@ function getRandomNum(max) {
 }
 
 
-module.exports = { quizStart, createQuestion, getAnswer };
+module.exports = { quizStart, createQuestion };

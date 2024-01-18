@@ -1,10 +1,16 @@
-const { Bot, InlineKeyboard, Keyboard } = require("grammy");
+const { Bot, InlineKeyboard, Keyboard, session } = require("grammy");
 const config = require("./config.json");
 const quiz = require("./quiz.js");
 
 const bot = new Bot(config.token);
 
-let quizStatus = false;
+function createInitialSessionData() {
+    return {
+        quizStatus: false,
+        currentCountry: ""
+    };
+}
+bot.use(session({ initial: createInitialSessionData }));
 
 bot.command("start", (ctx) => {
     const inlineKeyboard = new InlineKeyboard()
@@ -18,15 +24,15 @@ bot.command("start", (ctx) => {
 });
 
 bot.command("quiz", (ctx) => {
-    if (!quizStatus) {
-        quizStatus = !quizStatus;
+    if (!ctx.session.quizStatus) {
+        ctx.session.quizStatus = !ctx.session.quizStatus;
         quiz.quizStart(ctx);
     }
 });
 
 bot.callbackQuery("start", async (ctx) => {
-    if (!quizStatus) {
-        quizStatus = !quizStatus;
+    if (!ctx.session.quizStatus) {
+        ctx.session.quizStatus = !ctx.session.quizStatus;
         quiz.quizStart(ctx);
         await ctx.answerCallbackQuery({
             text: "You pressed 'Start' button."
@@ -44,8 +50,8 @@ bot.callbackQuery("options", async (ctx) => {
 });
 
 bot.hears(/stop quiz/i, async (ctx) => {
-    if (quizStatus) {
-        quizStatus = !quizStatus;
+    if (ctx.session.quizStatus) {
+        ctx.session.quizStatus = !ctx.session.quizStatus;
         await ctx.reply("Quiz Stopped.", {
             reply_markup: { remove_keyboard: true }
         });
@@ -53,8 +59,8 @@ bot.hears(/stop quiz/i, async (ctx) => {
 });
 
 bot.on("message:text", async (ctx) => {
-    if (quizStatus) {
-        let answer = quiz.getAnswer();
+    if (ctx.session.quizStatus) {
+        let answer = ctx.session.currentCountry;
         await answer === ctx.msg.text ? ctx.reply("Correct 👍") : ctx.reply(`Incorrect 👎. Right answer is <b>${answer}</b>`, { parse_mode: "HTML" });
         setTimeout(() => { quiz.createQuestion(ctx); }, 2000);
     }
