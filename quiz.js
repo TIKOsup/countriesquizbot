@@ -1,5 +1,4 @@
 const { Keyboard, InputMediaBuilder } = require("grammy");
-// const RestCountriesApi = require("./rest-countries-api.js");
 const axios = require("axios");
 
 let countriesData;
@@ -8,14 +7,23 @@ let countriesData;
 async function quizStart(ctx) {
     await axios.get("https://restcountries.com/v3.1/all").then((res) => {
         countriesData = res.data;
-        createQuestion(ctx);
+
+        // Creating the array from 0 to array length - [0,1,...,248,249]
+        let countriesOrder = Array.from(Array(countriesData.length).keys());
+        countriesOrder = shuffle(countriesOrder);
+        ctx.session.countriesOrder = countriesOrder;
+
+        createQuestion(ctx, ctx.session.countriesOrder[ctx.session.orderNum]);
     });
 }
 
 /* Takes a random country, creates an array of options */
-async function createQuestion(ctx) {
-    let pickedCountry = countriesData[getRandomNum(countriesData.length)];
-    ctx.session.currentCountry = pickedCountry.name.common;
+async function createQuestion(ctx, questionNum) {
+    let pickedCountry = countriesData[ctx.session.countriesOrder[questionNum]];
+
+    ctx.session.orderNum = ctx.session.orderNum + 1;
+    ctx.session.currentCountryName = pickedCountry.name.common;
+
     let options = getQuestionOptions(countriesData, pickedCountry.name.common, 4)
     await sendQuestion(ctx, pickedCountry.flags.png, options);
 }
@@ -32,16 +40,6 @@ async function sendQuestion(ctx, flag, options) {
 
 /* Creates an array of options */
 function getQuestionOptions(countriesData, rightCountryName, optionsNum) {
-
-    // Randomly shuffles an array element's order
-    const shuffle = (array) => {
-        for (let i = array.length - 1; i > 0; i--) {
-            const j = getRandomNum(i + 1);
-            [array[i], array[j]] = [array[j], array[i]];
-        }
-        return array;
-    }
-
     let options = [rightCountryName];
 
     // Fills an array with incorrect options
@@ -55,6 +53,15 @@ function getQuestionOptions(countriesData, rightCountryName, optionsNum) {
     options.push("Stop Quiz 🫡");
 
     return options;
+}
+
+/* Randomly shuffles an array element's order */
+function shuffle (array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = getRandomNum(i + 1);
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
 }
 
 /* Returns random number with maximum value as a parameter */

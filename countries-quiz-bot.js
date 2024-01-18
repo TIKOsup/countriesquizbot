@@ -7,7 +7,9 @@ const bot = new Bot(config.token);
 function createInitialSessionData() {
     return {
         quizStatus: false,
-        currentCountry: ""
+        countriesOrder: [],
+        orderNum: 0,
+        currentCountryName: ""
     };
 }
 bot.use(session({ initial: createInitialSessionData }));
@@ -52,6 +54,7 @@ bot.callbackQuery("options", async (ctx) => {
 bot.hears(/stop quiz/i, async (ctx) => {
     if (ctx.session.quizStatus) {
         ctx.session.quizStatus = !ctx.session.quizStatus;
+        ctx.session.orderNum = 0;
         await ctx.reply("Quiz Stopped.", {
             reply_markup: { remove_keyboard: true }
         });
@@ -60,9 +63,9 @@ bot.hears(/stop quiz/i, async (ctx) => {
 
 bot.on("message:text", async (ctx) => {
     if (ctx.session.quizStatus) {
-        let answer = ctx.session.currentCountry;
+        let answer = ctx.session.currentCountryName;
         await answer === ctx.msg.text ? ctx.reply("Correct 👍") : ctx.reply(`Incorrect 👎. Right answer is <b>${answer}</b>`, { parse_mode: "HTML" });
-        setTimeout(() => { quiz.createQuestion(ctx); }, 2000);
+        setTimeout(() => { quiz.createQuestion(ctx, ctx.session.countriesOrder[ctx.session.orderNum]); }, 2000);
     }
 });
 
