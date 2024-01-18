@@ -72,7 +72,7 @@ function stopQuiz(ctx) {
         ctx.session.rightAnswers = 0;
         ctx.session.wrongAnswers = 0;
 
-        ctx.reply(`Quiz Stopped. Right answers: ${rightAnswers}. Wrong answers: ${wrongAnswers}`, 
+        ctx.reply(`Quiz Stopped.\n✅ Right: ${rightAnswers}\n❌ Wrong: ${wrongAnswers}`, 
             { reply_markup: { remove_keyboard: true } });
     }
 }
